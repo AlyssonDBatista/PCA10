@@ -2,7 +2,7 @@
 
 Simulado não oficial da certificação PCA-10 da ABAC: 50 questões sorteadas a cada tentativa, 120 minutos, nota ponderada por módulo (aprovação com 70% e nenhum módulo zerado), gabarito comentado e treino dos erros.
 
-Site: https://alyssondbatista.github.io/PCA/ (GitHub Pages)
+Site: https://alyssondbatista.github.io/PCA10/ (GitHub Pages)
 
 Também publicado em https://simuladopca10.alyssondbatista.workers.dev/ (Cloudflare Workers)
 
