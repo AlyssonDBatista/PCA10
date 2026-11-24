@@ -105,7 +105,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 </style>
 </head>
 <body>
-<main id="app" aria-live="polite"></main>
+<main id="app"></main>
 <script>
 const M=["Objetivos e Legislação","Funcionamento e Processos","Cálculos Financeiros","Ética e Melhores Práticas"];
 const W=[24,26,25,25],N=[15,20,10,5];
@@ -228,7 +228,7 @@ const Q=[
 [1,"Quem fixa as regras do FGTS aplicáveis ao lance no consórcio?",["Conselho Curador do FGTS e CAIXA, como agente operador","Cada administradora, livremente, nas regras do seu contrato","A ABAC, por meio do Código de Conduta e Ética","O Procon, junto com o Banco Central do Brasil"],"Res. BCB 285, art. 53.","Res. BCB 285/2023, art. 53"],
 [1,"O imóvel a adquirir com FGTS não pode ter usado FGTS na aquisição ou construção nos últimos:",["3 anos","1 ano","5 anos","10 anos"],"Regra divulgada pelas administradoras. Confira sempre o Manual da Moradia Própria vigente.","FGTS (Manual da Moradia Própria, CAIXA), requisitos do imóvel (3 anos)"],
 [2,"O valor da prestação, segundo a Lei 11.795/2008, corresponde à soma de:",["Parcela do fundo comum, taxa de administração e demais obrigações previstas no contrato","Parcela do fundo comum e fundo de reserva, sem a taxa de administração","Fundo de reserva e seguro","Taxa de administração e multa"],"Art. 27.","Lei 11.795/2008, art. 27"],
-[2,"A antecipação de taxa de administração (art. 27, §3º) é exigível apenas:",["No ato da assinatura do contrato, e é deduzida do total da taxa ao longo do grupo","Em toda assembleia","Após a contemplação","Ao final do grupo"],"Art. 27, §3º, I e II.","Lei 11.795/2008, art. 27, §3º, II (cálculo)"],
+[2,"A antecipação de taxa de administração (art. 27, §3º) é exigível apenas:",["No ato da assinatura do contrato, e é deduzida do total da taxa ao longo do grupo","Na primeira assembleia, e é somada ao valor de cada parcela mensal","Após a contemplação, e é cobrada junto com o lance vencedor","Ao final do grupo, e é descontada dos recursos não procurados"],"A antecipação não integra o preço da parcela: só pode ser exigida no ato da assinatura do contrato (inciso I) e é deduzida do valor total da taxa de administração ao longo do grupo (inciso II).","Lei 11.795/2008, art. 27, §3º, II (cálculo)"],
 [2,"Consorciado usa R$ 30.000 de FGTS como lance em cota de crédito de R$ 150.000. O lance corresponde a:",["20% do crédito","30% do crédito","15% do crédito","25% do crédito"],"30.000 ÷ 150.000 = 20%.","Res. BCB 285/2023, arts. 12 e 13 (cálculo)"],
 [2,"Lance de 25% sobre crédito de R$ 80.000, com R$ 12.000 de FGTS. Quanto falta pagar com recursos próprios?",["R$ 8.000","R$ 12.000","R$ 20.000","R$ 32.000"],"25% × 80.000 = 20.000; 20.000 − 12.000 = 8.000.","Res. BCB 285/2023, arts. 12 e 13 (cálculo)"],
 [2,"Multa de R$ 600 por mora. Qual o valor mínimo que o contrato deve destinar ao grupo?",["R$ 300","R$ 60","R$ 150","R$ 600"],"Art. 28 da Lei: ao menos 50% da multa e juros destinam-se ao grupo.","Lei 11.795/2008, art. 28 (cálculo)"],
@@ -423,7 +423,7 @@ const Q=[
 [3,"Um colega pede a lista de clientes da administradora para oferecer o produto da empresa dele. O profissional deve:",["Recusar, pois os dados só podem ser usados para a finalidade informada ao cliente","Enviar a lista, desde que o colega também trabalhe com vendas de consórcio na região","Enviar só nomes e telefones, que não são considerados dados pessoais","Vender a lista e dividir o valor recebido com a administradora"],"LGPD, art. 6º, I a III: finalidade, adequação e necessidade. Nome e telefone são dados pessoais (art. 5º, I).","LGPD (Lei 13.709/2018), arts. 5º, I e 6º"],
 ];
 const qid=t=>{let h=5381;for(let i=0;i<t.length;i++)h=((h*33)^t.charCodeAt(i))>>>0;return h.toString(36)};
-const BYID={};Q.forEach(q=>{q.id=qid(q[1]);BYID[q.id]=q});
+const BYID={},BYM=M.map(()=>[]);Q.forEach(q=>{q.id=qid(q[1]);BYID[q.id]=q;BYM[q[0]].push(q)});
 const KH='pca10_hist_v1',KE='pca10_erros_v1',KS='pca10_andamento_v1';
 const get=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
 const put=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
@@ -439,18 +439,19 @@ let S=null,T=null,confirmClear=false,confirmEnd=false;
 const save=()=>{if(S&&!S.res)put(KS,{mode:S.mode,lab:S.lab,i:S.i,end:S.end,l:S.l.map(it=>({id:it.q.id,o:it.o.map(o=>it.q[2].indexOf(o[0])),a:it.a}))})};
 const drop=()=>{try{localStorage.removeItem(KS)}catch(e){}};
 function saved(){const v=get(KS,null);const okO=o=>Array.isArray(o)&&o.length==4&&new Set(o).size==4&&o.every(j=>Number.isInteger(j)&&j>=0&&j<4);
-  if(!isObj(v)||!Array.isArray(v.l)||!["exam","mod","all","err"].includes(v.mode)||!Number.isFinite(v.end)||!Number.isInteger(v.i)||!v.l.every(x=>isObj(x)&&okO(x.o)&&(x.a===null||(Number.isInteger(x.a)&&x.a>=0&&x.a<4)))){if(v!==null)drop();return null}
+  if(!isObj(v)||!Array.isArray(v.l)||!["exam","mod","all","err"].includes(v.mode)||!Number.isFinite(v.end)||!Number.isInteger(v.i)||v.i<0||typeof v.lab!="string"||!v.l.every(x=>isObj(x)&&okO(x.o)&&(x.a===null||(Number.isInteger(x.a)&&x.a>=0&&x.a<4)))){if(v!==null)drop();return null}
   const l=v.l.filter(x=>BYID[x.id]).map(x=>{const q=BYID[x.id];return{q,o:x.o.map(j=>[q[2][j],j==0]),a:x.a}});if(l.length!=v.l.length||!l.length){drop();return null}return{...v,l}}
 function resume(){const v=saved();if(!v)return home();S={mode:v.mode,lab:v.lab,i:Math.min(v.i,v.l.length-1),end:v.end,l:v.l};confirmClear=false;confirmEnd=false;if(S.mode=="exam"&&S.end<=Date.now())return fin();show(true)}
 function discard(){drop();home()}
 function prev(){if(S.i>0){S.i--;confirmEnd=false;save();show(true);scrollTo(0,0)}}
 const hold=()=>{const a=$("#app");a.style.pointerEvents="none";setTimeout(()=>a.style.pointerEvents="",400)};
-const fmtLeft=r=>{const m=Math.max(0,Math.floor(r/60000));return Math.floor(m/60)+"h"+String(m%60).padStart(2,"0")};
-const fmtD=t=>{const d=new Date(t);return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")};
+const p2=n=>String(n).padStart(2,"0");
+const fmtLeft=r=>{const m=Math.max(0,Math.floor(r/60000));return Math.floor(m/60)+"h"+p2(m%60)};
+const fmtD=t=>{const d=new Date(t);return p2(d.getDate())+"/"+p2(d.getMonth()+1)};
 
 function home(){
   clearInterval(T);S=null;confirmEnd=false;
-  const H=getH(),E=errs(),cnt=M.map((_,k)=>Q.filter(q=>q[0]==k).length);
+  const H=getH(),E=errs();
   const hist=H.length?H.slice(0,5).map(h=>`<div class="row"><span>${fmtD(h.t)} · ${esc(h.lab)}</span><strong class="${h.m=='exam'?(h.ok?'okt':'not'):''}">${Number.isFinite(h.c)&&Number.isFinite(h.n)&&h.n?h.c+'/'+h.n+' · ':''}${esc(String(+h.p).replace('.',','))}%${h.m=='exam'?(h.ok?' · aprovado':' · reprovado'):''}</strong></div>`).join(""):`<p class="mut small">Nenhuma tentativa ainda. Faça uma prova ou um treino e o resultado aparece aqui.</p>`;
   const R0=saved(),ans=R0?R0.l.filter(x=>x.a!==null).length:0,left=R0&&R0.mode=="exam"?R0.end-Date.now():0;
   const clear=confirmClear?`<div class="confirm"><span>Apagar o histórico, os erros e a prova em andamento salvos neste aparelho?</span><button class="btn-line" onclick="clearAll()">Apagar</button><button class="btn-quiet" onclick="confirmClear=false;home()">Cancelar</button></div>`:(H.length||E.length||R0?`<button class="btn-quiet" style="align-self:flex-start" onclick="confirmClear=true;home()">Apagar meu histórico</button>`:"");
@@ -467,7 +468,7 @@ function home(){
   <button class="${R0?"btn-line":"btn"}" onclick="start('exam')">${R0?"Começar uma prova nova":"Iniciar prova completa"}</button>
   <section class="stack">
     <h2>Treinar por módulo</h2>
-    <div class="mods">${M.map((m,k)=>`<button class="mod" onclick="start('mod',${k})">${m}<span>${cnt[k]} questões</span></button>`).join("")}
+    <div class="mods">${M.map((m,k)=>`<button class="mod" onclick="start('mod',${k})">${m}<span>${BYM[k].length} questões</span></button>`).join("")}
       <button class="mod wide" onclick="start('all')">Todas as questões<span>${Q.length} questões</span></button></div>
     <p class="note">No treino e na prova, o gabarito e as explicações aparecem só no final.</p>
   </section>
@@ -484,8 +485,8 @@ function clearAll(){try{localStorage.removeItem(KH);localStorage.removeItem(KE);
 
 function start(mode,k){
   let p=[],lab="";
-  if(mode=="exam"){for(let m=0;m<4;m++)p.push(...sh(Q.filter(q=>q[0]==m)).slice(0,N[m]));lab="Prova completa"}
-  else if(mode=="mod"){p=sh(Q.filter(q=>q[0]==k));lab="Treino · "+M[k]}
+  if(mode=="exam"){BYM.forEach((l,m)=>p.push(...sh(l).slice(0,N[m])));lab="Prova completa"}
+  else if(mode=="mod"){p=sh(BYM[k]);lab="Treino · "+M[k]}
   else if(mode=="all"){p=sh(Q);lab="Treino · todas"}
   else {p=sh(errs().map(i=>BYID[i]));lab="Treino · meus erros"}
   if(!p.length)return home();
@@ -496,7 +497,7 @@ function show(focus){
   const it=S.l[S.i],n=S.l.length,last=S.i==n-1,exam=S.mode=="exam";
   $("#app").innerHTML=`
   <div class="top"><span>${esc(S.lab)}</span><span>${S.i+1} de ${n}</span></div>
-  ${exam?`<div class="top"><span class="small">Ao avançar, não é possível voltar</span><span class="clock" id="tm">--:--</span></div>`:""}
+  ${exam?`<div class="top"><span class="small">Ao avançar, não é possível voltar</span><span class="clock" id="tm" role="timer" aria-label="Tempo restante">--:--</span></div>`:""}
   <div class="track" aria-hidden="true"><div style="width:${(S.i/n*100).toFixed(1)}%"></div></div>
   <span class="tag">${M[it.q[0]]}</span>
   <h2 class="qtext" tabindex="-1">${it.q[1]}</h2>
@@ -515,15 +516,15 @@ function nxt(){if(S.l[S.i].a===null)return;if(S.i<S.l.length-1){S.i++;confirmEnd
 function tick(){
   clearInterval(T);if(S.mode!="exam")return;
   const f=()=>{const r=S.end-Date.now(),el=$("#tm");if(r<=0){clearInterval(T);return fin()}
-    if(el){const m=Math.floor(r/60000);el.textContent=Math.floor(m/60)+":"+String(m%60).padStart(2,"0")+":"+String(Math.floor(r/1000)%60).padStart(2,"0");el.classList.toggle("low",r<600000)}};
+    if(el){const s=Math.floor(r/1000);el.textContent=Math.floor(s/3600)+":"+p2(Math.floor(s/60)%60)+":"+p2(s%60);el.classList.toggle("low",r<600000)}};
   f();T=setInterval(f,1000);
 }
 const isOk=it=>it.a!==null&&it.o[it.a][1];
 function fin(){
   if(!S||S.res)return;
-  clearInterval(T);confirmEnd=false;drop();
   const exam=S.mode=="exam",use=exam?S.l:S.l.filter(it=>it.a!==null);
-  if(!use.length)return home();
+  if(!use.length){confirmEnd=false;return show()}
+  clearInterval(T);confirmEnd=false;drop();
   const mods=M.map((_,k)=>{const l=use.filter(it=>it.q[0]==k);return[l.length,l.filter(isOk).length]});
   const c=use.filter(isOk).length;let p,ok=null,zero=false;
   if(exam){let w=0,s=0;mods.forEach(([n,cc],k)=>{if(n){w+=W[k];s+=W[k]*cc/n;if(!cc)zero=true}});p=Math.round(s/w*1000)/10;ok=p>=70&&!zero}
@@ -560,9 +561,10 @@ function review(top){
 }
 document.addEventListener("keydown",e=>{
   if(!S||S.res||e.ctrlKey||e.metaKey||e.altKey)return;
-  const k=e.key.toLowerCase(),j="abcd".indexOf(k)>=0?"abcd".indexOf(k):"1234".indexOf(k);
-  if(j>=0&&j<S.l[S.i].o.length&&k.length==1){e.preventDefault();pick(j);return}
-  if(e.key=="Enter"&&!(e.target&&e.target.tagName=="BUTTON")&&S.l[S.i].a!==null){e.preventDefault();nxt()}
+  const k=e.key.length==1?e.key.toLowerCase():"",j=k?Math.max("abcd".indexOf(k),"1234".indexOf(k)):-1;
+  if(j>=0){e.preventDefault();pick(j);return}
+  const t=e.target,onBtn=t&&t.tagName=="BUTTON"&&!t.classList.contains("opt");
+  if(e.key=="Enter"&&!onBtn&&S.l[S.i].a!==null){e.preventDefault();nxt()}
 });
 addEventListener("beforeunload",e=>{if(S&&!S.res&&S.mode=="exam"){e.preventDefault();e.returnValue=""}});
 try{home()}catch(e){try{[KH,KE,KS].forEach(k=>localStorage.removeItem(k))}catch(_){}S=null;home()}
